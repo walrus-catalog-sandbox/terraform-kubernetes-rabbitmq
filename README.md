@@ -1,17 +1,29 @@
-# Awesome Walrus Template
+# Kubernetes RabbitMQ Template
 
-Start here to create an awesome Walrus template.
+Terraform module which deploys containerized RabbitMQ on Kubernetes, powered
+by [Bitnami Charts/RabbitMQ](https://github.com/bitnami/charts/tree/main/bitnami/rabbitmq).
 
 ## Usage
 
 ```hcl
+module "rabbitmq" {
+  source = "..."
 
+  infrastructure = {
+    namespace = "default"
+  }
+
+  deployment = {
+    version  = "3.12.8"
+    username = "..."
+    password = "..."
+  }
+}
 ```
 
 ## Examples
 
-- ...
-- ...
+- [Complete](./examples/complete)
 
 ## Contributing
 
@@ -23,38 +35,45 @@ Please read our [contributing guide](./docs/CONTRIBUTING.md) if you're intereste
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
+| <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 2.0.0 |
+| <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.5.1 |
 
 ## Providers
 
-No providers.
+| Name | Version |
+|------|---------|
+| <a name="provider_random"></a> [random](#provider\_random) | >= 3.5.1 |
+| <a name="provider_helm"></a> [helm](#provider\_helm) | >= 2.0.0 |
 
 ## Modules
 
-| Name | Source | Version |
-|------|--------|---------|
-| <a name="module_submodule"></a> [submodule](#module\_submodule) | ./modules/submodule | n/a |
+No modules.
 
 ## Resources
 
-No resources.
+| Name | Type |
+|------|------|
+| [helm_release.rabbitmq](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
+| [random_password.password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
+| [random_string.name_suffix](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_context"></a> [context](#input\_context) | Receive contextual information. When Walrus deploys, Walrus will inject specific contextual information into this field.<br><br>Examples:<pre>context:<br>  project:<br>    name: string<br>    id: string<br>  environment:<br>    name: string<br>    id: string<br>  resource:<br>    name: string<br>    id: string</pre> | `map(any)` | `{}` | no |
+| <a name="input_infrastructure"></a> [infrastructure](#input\_infrastructure) | Specify the infrastructure information for deploying.<br><br>Examples:<pre>infrastructure:<br>  namespace: string, optional<br>  image_registry: string, optional<br>  domain_suffix: string, optional</pre> | <pre>object({<br>    namespace      = optional(string)<br>    image_registry = optional(string, "registry-1.docker.io")<br>    domain_suffix  = optional(string, "cluster.local")<br>  })</pre> | `{}` | no |
+| <a name="input_deployment"></a> [deployment](#input\_deployment) | Specify the deployment action, including architecture and account.<br><br>Examples:<pre>deployment:<br>  version: string, optional      # https://hub.docker.com/r/bitnami/rabbitmq/tags<br>  password: string, optional<br>  username: string, optional<br>  resources:<br>      requests:<br>        cpu: number<br>        memory: number             # in megabyte<br>      limits:<br>        cpu: number<br>        memory: number             # in megabyte<br>    storage:                       # convert to empty_dir volume if null or dynamic volume claim template<br>      class: string<br>      size: number, optional       # in megabyte</pre> | <pre>object({<br>    version  = optional(string, "3.12.8")<br>    username = optional(string, "user")<br>    password = optional(string)<br>    resources = optional(object({<br>      requests = object({<br>        cpu    = optional(number, 0.25)<br>        memory = optional(number, 256)<br>      })<br>      limits = optional(object({<br>        cpu    = optional(number, 0)<br>        memory = optional(number, 0)<br>      }))<br>    }), { requests = { cpu = 0.25, memory = 256 } })<br>    storage = optional(object({<br>      class = optional(string)<br>      size  = optional(number, 20 * 1024)<br>    }), { size = 20 * 1024 })<br>  })</pre> | `{}` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_walrus_project_name"></a> [walrus\_project\_name](#output\_walrus\_project\_name) | The name of project where deployed in Walrus. |
-| <a name="output_walrus_project_id"></a> [walrus\_project\_id](#output\_walrus\_project\_id) | The id of project where deployed in Walrus. |
-| <a name="output_walrus_environment_name"></a> [walrus\_environment\_name](#output\_walrus\_environment\_name) | The name of environment where deployed in Walrus. |
-| <a name="output_walrus_environment_id"></a> [walrus\_environment\_id](#output\_walrus\_environment\_id) | The id of environment where deployed in Walrus. |
-| <a name="output_walrus_resource_name"></a> [walrus\_resource\_name](#output\_walrus\_resource\_name) | The name of resource where deployed in Walrus. |
-| <a name="output_walrus_resource_id"></a> [walrus\_resource\_id](#output\_walrus\_resource\_id) | The id of resource where deployed in Walrus. |
-| <a name="output_submodule"></a> [submodule](#output\_submodule) | The message from submodule. |
+| <a name="output_context"></a> [context](#output\_context) | The input context, a map, which is used for orchestration. |
+| <a name="output_selector"></a> [selector](#output\_selector) | The selector, a map, which is used for dependencies or collaborations. |
+| <a name="output_endpoint_internal"></a> [endpoint\_internal](#output\_endpoint\_internal) | The internal amqp endpoints, a string list, which are used for internal access. |
+| <a name="output_username"></a> [username](#output\_username) | The username of rabbitmq service. |
+| <a name="output_password"></a> [password](#output\_password) | The password of rabbitmq service. |
 <!-- END_TF_DOCS -->
 
 ## License
