@@ -20,5 +20,6 @@ output "username" {
 
 output "password" {
   value       = local.password
+  sensitive   = true
   description = "The password of rabbitmq service."
 }
