@@ -49,6 +49,7 @@ resource "random_string" "name_suffix" {
 
 locals {
   name     = join("-", [local.resource_name, random_string.name_suffix.result])
+  username = coalesce(var.username, "user")
   password = coalesce(var.password, random_password.password.result)
 }
 
@@ -82,23 +83,20 @@ locals {
         image_registry = local.image_registry
       }
 
-      # common parameters: https://github.com/bitnami/charts/tree/main/bitnami/rabbitmq#common-parameters
-      fullnameOverride  = local.name
-      commonAnnotations = local.annotations
-      commonLabels      = local.labels
-
       # rabbitmq image parameters: https://github.com/bitnami/charts/tree/main/bitnami/rabbitmq#rabbitmq-image-parameters
       image = {
         repository = "bitnami/rabbitmq"
         tag        = coalesce(var.engine_version, "3.11")
       }
 
+      # common parameters: https://github.com/bitnami/charts/tree/main/bitnami/rabbitmq#common-parameters
+      fullnameOverride  = local.name
+      commonAnnotations = local.annotations
+      commonLabels      = local.labels
       auth = {
-        username = coalesce(var.username, "user")
+        username = local.username
       }
-
-      resources = local.resources
-
+      resources   = local.resources
       persistence = local.persistence
     },
   ]

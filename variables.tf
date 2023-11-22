@@ -67,7 +67,7 @@ EOF
   type        = string
   default     = "user"
   validation {
-    condition     = can(regex("^[a-z][a-z0-9_]{0,14}[a-z0-9]$", var.username))
+    condition     = var.username == "" || can(regex("^[a-z][a-z0-9_]{0,14}[a-z0-9]$", var.username))
     error_message = format("Invalid username: %s", var.username)
   }
 }
@@ -81,7 +81,7 @@ EOF
   default     = null
   sensitive   = true
   validation {
-    condition     = var.password == null || can(regex("^[A-Za-z0-9\\!#\\$%\\^&\\*\\(\\)_\\+\\-=]{8,32}", var.password))
+    condition     = var.password == null || var.password == "" || can(regex("^[A-Za-z0-9\\!#\\$%\\^&\\*\\(\\)_\\+\\-=]{8,32}", var.password))
     error_message = "Invalid password"
   }
 }
