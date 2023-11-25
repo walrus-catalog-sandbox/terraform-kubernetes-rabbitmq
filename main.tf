@@ -74,6 +74,9 @@ locals {
     accessModes  = ["ReadWriteOnce"]
     size         = try(format("%dMi", var.storage.size), "20480Mi")
   }
+  service = {
+    type = try(coalesce(var.infrastructure.service_type, "NodePort"), "NodePort")
+  }
 
   values = [
     # basic configuration.
@@ -99,6 +102,9 @@ locals {
       }
       resources   = local.resources
       persistence = local.persistence
+
+      # exposure parameters: https://github.com/bitnami/charts/tree/main/bitnami/rabbitmq#exposure-parameters
+      service = local.service
     },
   ]
 }
