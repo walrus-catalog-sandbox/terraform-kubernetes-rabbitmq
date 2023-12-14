@@ -47,12 +47,15 @@ function generate_doc() {
   fi
 
   seal::terraform::docs "${target}" --config="${target}/.terraform-docs.yml" --recursive
-  local examples=()
-  # shellcheck disable=SC2086
-  IFS=" " read -r -a examples <<<"$(seal::util::find_subdirs ${target}/examples)"
-  for example in "${examples[@]}"; do
-    seal::terraform::docs "${target}/examples/${example}" --config="${target}/.terraform-docs.yml"
-  done
+
+  if [[ -d "${target}/examples" ]]; then
+    local examples=()
+    # shellcheck disable=SC2086
+    IFS=" " read -r -a examples <<<"$(seal::util::find_subdirs ${target}/examples)"
+    for example in "${examples[@]}"; do
+      seal::terraform::docs "${target}/examples/${example}" --config="${target}/.terraform-docs.yml"
+    done
+  fi
 }
 
 function generate_schema() {
@@ -66,22 +69,25 @@ function generate_schema() {
       tfs=$(seal::util::find_files "${path}" "*.tf")
 
       if [[ -n "${tfs}" ]]; then
-        seal::terraform::docs "${path}" --config="${target}/.terraform-docs.yml"
+        seal::walrus_cli::schema "${target}"
       else
         seal::log::warn "There is no Terraform files under ${path}"
       fi
     done
-    
+
     return 0
   fi
 
   seal::walrus_cli::schema "${target}"
-  local sub_modules=()
-  # shellcheck disable=SC2086
-  IFS=" " read -r -a sub_modules <<<"$(seal::util::find_subdirs ${target}/modules)"
-  for module in "${sub_modules[@]}"; do
-    seal::walrus_cli::schema "${target}/modules/${module}"
-  done
+
+  if [[ -d "${target}/modules" ]]; then
+    local modules=()
+    # shellcheck disable=SC2086
+    IFS=" " read -r -a modules <<<"$(seal::util::find_subdirs ${target}/modules)"
+    for module in "${modules[@]}"; do
+      seal::walrus_cli::schema "${target}/modules/${module}"
+    done
+  fi
 }
 
 #
